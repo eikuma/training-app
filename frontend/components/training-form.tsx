@@ -88,16 +88,21 @@ export default function TrainingForm() {
   }
 
   return (
-    <Box sx={{ maxWidth: 800, margin: "0 auto", p: 2 }}>
-      <Card>
+    <Box sx={{ maxWidth: 700, margin: "0 auto" }}> {/* Reduced maxWidth slightly for better centering in some views */}
+      {/* Card will use theme defaults (elevation=2, borderRadius=12) */}
+      <Card> 
         <CardHeader
-          title="トレーニングメニュー提案"
-          subheader="あなたの目標と条件に合わせたトレーニングメニューを提案します"
+          title="トレーニングメニュー提案フォーム"
+          // Ensure CardHeader text uses theme colors
+          titleTypographyProps={{ variant: 'h6', align: 'center', fontWeight: 'medium', color: 'text.primary' }}
+          subheader="あなたの目標と条件を入力して、最適なメニューを見つけましょう"
+          subheaderTypographyProps={{ align: 'center', sx: { mb: 1 }, color: 'text.secondary' }}
+          sx={{pb: 1}}
         />
-        <CardContent>
-          {/* トレーニング目的（プルダウン） */}
-          <Box sx={{ mb: 3 }}>
-            <FormControl fullWidth>
+        <CardContent sx={{pt: 1}}>
+          <Box sx={{ mb: 2.5 }}>
+            {/* FormControl, InputLabel, Select will use theme defaults (outlined, small) */}
+            <FormControl fullWidth> 
               <InputLabel id="training-goal-label">トレーニング目的</InputLabel>
               <Select
                 labelId="training-goal-label"
@@ -105,9 +110,6 @@ export default function TrainingForm() {
                 label="トレーニング目的"
                 onChange={(e) => setTrainingGoal(e.target.value)}
               >
-                {/* <MenuItem value="">
-                  <em>選択しない</em>
-                </MenuItem> */}
                 {trainingGoals.map((goal) => (
                   <MenuItem key={goal.id} value={goal.value}>
                     {goal.label}
@@ -119,27 +121,36 @@ export default function TrainingForm() {
 
           {/* トレーニングしたい部位（チェックボックス） */}
           <Box sx={{ mb: 3 }}>
-            <Typography variant="subtitle1" gutterBottom>
+          {/* トレーニングしたい部位（チェックボックス） */}
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'medium', color: 'text.primary' }}> 
               トレーニングしたい部位（複数選択可）
             </Typography>
-            <FormGroup>
+            <FormGroup sx={{ 
+              display: 'grid', 
+              gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)' }, 
+              gap: 0.5 
+            }}>
               {bodyParts.map((part) => (
                 <FormControlLabel
                   key={part.id}
                   control={
+                    // Checkbox color will be primary by default from theme if not specified
                     <Checkbox
                       checked={selectedParts.includes(part.value)}
                       onChange={() => handlePartChange(part.value)}
+                      size="small" 
                     />
                   }
-                  label={part.label}
+                  // Ensure label Typography uses theme's body2 and appropriate color
+                  label={<Typography variant="body2" sx={{color: 'text.secondary'}}>{part.label}</Typography>} 
                 />
               ))}
             </FormGroup>
           </Box>
 
           {/* トレーニング経験（プルダウン） */}
-          <Box sx={{ mb: 3 }}>
+          <Box sx={{ mb: 2.5 }}>
             <FormControl fullWidth>
               <InputLabel id="experience-level-label">トレーニング経験</InputLabel>
               <Select
@@ -163,14 +174,14 @@ export default function TrainingForm() {
           {/* トレーニング時間（プルダウン） */}
           <Box sx={{ mb: 3 }}>
             <FormControl fullWidth>
-              <InputLabel id="available-time-label">トレーニング時間</InputLabel>
+              <InputLabel id="available-time-label">トレーニング時間（目安）</InputLabel>
               <Select
                 labelId="available-time-label"
                 value={availableTime.toString()}
-                label="トレーニング時間"
+                label="トレーニング時間（目安）"
                 onChange={(e) => setAvailableTime(Number(e.target.value))}
               >
-                {[30, 60, 90, 120, 150, 180].map((time) => (
+                {[30, 45, 60, 75, 90, 105, 120, 150, 180].map((time) => ( // Added 45, 75, 105 min options
                   <MenuItem key={time} value={time.toString()}>
                     {time}分
                   </MenuItem>
@@ -179,21 +190,25 @@ export default function TrainingForm() {
             </FormControl>
           </Box>
         </CardContent>
-        <CardActions>
-          <Button onClick={handleSubmit} disabled={isLoading} variant="contained" fullWidth>
-            トレーニングメニューを提案
+        <CardActions sx={{ p: 2, pt: 1 }}>
+          {/* Button will use theme defaults (textTransform, borderRadius) */}
+          <Button 
+            onClick={handleSubmit} 
+            disabled={isLoading || !trainingGoal || selectedParts.length === 0 || !experienceLevel} 
+            variant="contained" 
+            color="primary" 
+            size="large" 
+            fullWidth
+            startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : null}
+          >
+            {isLoading ? "提案を生成中..." : "トレーニングメニューを提案"}
           </Button>
         </CardActions>
       </Card>
 
-      {isLoading && (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-          <CircularProgress />
-        </Box>
-      )}
-
-      {!isLoading && recommendations.length > 0 && (
-        <Box sx={{ mt: 2 }}>
+      {/* RecommendationDisplay is shown below the card, mt: 2 is fine */}
+      {recommendations.length > 0 && !isLoading && ( 
+        <Box sx={{ mt: 3 }}> {/* Increased margin top for separation */}
           <RecommendationDisplay recommendation={recommendations} />
         </Box>
       )}
