@@ -121,8 +121,6 @@ export default function TrainingForm() {
 
           {/* トレーニングしたい部位（チェックボックス） */}
           <Box sx={{ mb: 3 }}>
-          {/* トレーニングしたい部位（チェックボックス） */}
-          <Box sx={{ mb: 3 }}>
             <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'medium', color: 'text.primary' }}> 
               トレーニングしたい部位（複数選択可）
             </Typography>

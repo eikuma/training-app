@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from 'next/link';
 import {
   Box,
   Button,
@@ -20,6 +19,7 @@ import {
   Typography,
   TextField,
   CircularProgress,
+  Paper,
 } from "@mui/material";
 import WorkoutsAPI from "@/features/workouts/api";
 import type {
@@ -34,6 +34,7 @@ import type {
   Exercise,
   Set,
 } from "@/features/workouts/types";
+import { useTheme } from '@mui/material/styles';
 
 // 例として利用するトレーニングメニュー一覧
 const trainingMenus = [
@@ -51,6 +52,7 @@ for (let w = 0.5; w <= 100; w += 0.5) {
 }
 
 const Workouts = () => {
+  const theme = useTheme();
   // 日付入力（yyyy-mm-dd形式）
   const [date, setDate] = useState<string>("");
   // セッション情報（取得済みの場合）
@@ -274,7 +276,7 @@ const Workouts = () => {
                             p: 1.5, 
                             textAlign: 'center',
                             // Using theme's grey shade for background
-                            backgroundColor: (theme) => theme.palette.mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[100],
+                            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[100],
                           }}
                         >
                           <Typography variant="subtitle2" gutterBottom sx={{ color: 'text.primary' }}>

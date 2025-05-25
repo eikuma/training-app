@@ -1,8 +1,11 @@
+'use client';
 import React from 'react';
 import Link from 'next/link';
 import { Box, Typography, Button, Container, Paper } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 const Home: React.FC = () => {
+  const theme = useTheme();
   return (
     // Container's mt/mb might be slightly adjusted by Layout.tsx's new responsive padding. This is fine.
     <Container maxWidth="md" sx={{ textAlign: 'center' /* Removed mt, mb as Layout.tsx handles it */ }}>
@@ -12,8 +15,7 @@ const Home: React.FC = () => {
           padding: { xs: 3, sm: 4, md: 6 }, // Adjusted responsive padding slightly
           mb: 4, // Margin bottom for spacing before CTAs
           // Using theme's background.default for light mode, and a dark grey for dark mode
-          backgroundColor: (theme) => 
-            theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.background.default,
+          backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.background.default,
         }}
       >
         <Typography

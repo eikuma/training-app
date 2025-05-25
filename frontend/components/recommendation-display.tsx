@@ -1,3 +1,4 @@
+'use client';
 import React from "react";
 import {
   Card,
@@ -5,10 +6,12 @@ import {
   CardContent,
   Typography
 } from "@mui/material";
+import { useTheme } from '@mui/material/styles';
 
 import { RecommendationResponse } from '@/features/recommendations/types/index';
 
 export default function RecommendationDisplay({ recommendation }: RecommendationResponse) {
+  const theme = useTheme();
   if (!recommendation) return null;
 
   return (
@@ -20,7 +23,7 @@ export default function RecommendationDisplay({ recommendation }: Recommendation
         mt: 3, // Keep increased margin top from previous refactor attempt
         // Use a slightly off-white for paper in light mode, or a dark grey for dark mode.
         // theme.palette.background.paper is usually #fff, this provides a subtle difference.
-        backgroundColor: (theme) => theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[50], 
+        backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[50], 
         borderColor: 'primary.main', // Use theme's primary color string directly
         borderTopWidth: 3,
         borderTopStyle: 'solid',
