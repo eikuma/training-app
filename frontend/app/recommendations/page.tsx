@@ -1,23 +1,24 @@
 import React from 'react';
-import TrainingForm from "@/components/training-form"
-import Link from 'next/link';
+import TrainingForm from "@/components/training-form";
+import { Container, Typography, Box } from '@mui/material';
 
-
-const Recommendations = () => {
+const RecommendationsPage = () => {
   return (
-    <main className="min-h-screen py-12 px-4">
-      <div className="container mx-auto">
-        <div style={{ margin: '1rem' }}>
-          <Link href="/" passHref>
-            <button style={{ padding: '0.5rem 1rem', fontSize: '1rem' }}>ホームへ</button>
-          </Link>
-        </div>
-        <h1 className="text-3xl font-bold text-center mb-8">パーソナライズドトレーニング提案</h1>
-        <TrainingForm />
-      </div>
-    </main>
-  )
+    // mt, mb removed as Layout.tsx now provides responsive vertical spacing for its Container.
+    // Page-specific mb on the Box below is kept.
+    <Container maxWidth="md"> 
+      <Box sx={{ textAlign: 'center', mb: { xs: 3, sm: 4 } }}> {/* Responsive margin bottom */}
+        <Typography variant="h4" component="h1" gutterBottom sx={{ color: 'text.primary' }}>
+          パーソナライズドトレーニング提案
+        </Typography>
+        <Typography variant="subtitle1" color="text.secondary"> {/* Changed to text.secondary */}
+          あなたの目標や経験に合わせて、最適なトレーニングメニューをご提案します。
+        </Typography>
+      </Box>
+      <TrainingForm />
+    </Container>
+  );
 };
 
-export default Recommendations;
+export default RecommendationsPage;
 
