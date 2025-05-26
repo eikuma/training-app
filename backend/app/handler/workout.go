@@ -92,7 +92,16 @@ func (h *WorkoutImpl) CreateWorkoutSession(c echo.Context) error {
 		return echo.NewHTTPError(400, "invalid date format: "+err.Error())
 	}
 
-	workoutSession, err := h.WorkoutService.CreateWorkoutSession(parsedDate, f.UserID)
+	// Retrieve userID from context
+	userID, ok := c.Get("userID").(int64)
+	if !ok {
+		// This should ideally not happen if AuthMiddleware is correctly applied and working.
+		// It indicates an issue with how userID is set or retrieved, or middleware not being run.
+		return echo.NewHTTPError(500, "Failed to get user ID from context or user ID is not of type int64")
+	}
+
+	// Pass the retrieved userID to the service layer
+	workoutSession, err := h.WorkoutService.CreateWorkoutSession(parsedDate, userID)
 	if err != nil {
 		return err
 	}

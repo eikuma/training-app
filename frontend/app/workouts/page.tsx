@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from 'next/link';
+import { useRouter } from 'next/navigation'; // Added for logout
 import {
   Box,
   Button,
@@ -59,6 +60,8 @@ const Workouts = () => {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   // ローディング状態
   const [loading, setLoading] = useState<boolean>(false);
+  const router = useRouter(); // Added for logout
+
   // 「トレーニングメニュー追加」フォームの表示
   const [showExerciseForm, setShowExerciseForm] = useState<boolean>(false);
   // ドロップダウンで選択中のトレーニングメニュー
@@ -169,13 +172,31 @@ const Workouts = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    router.push('/login');
+  };
+
   return (
     <Box sx={{ maxWidth: 800, mx: "auto", p: 2 }}>
-      <div style={{ margin: "1rem" }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Link href="/" passHref>
-          <button style={{ padding: "0.5rem 1rem", fontSize: "1rem" }}>ホームへ</button>
+          <Button variant="outlined" sx={{ mr: 1 }}>ホームへ</Button>
         </Link>
-      </div>
+        <Button 
+          variant="contained" 
+          onClick={handleLogout}
+          sx={{ 
+            backgroundColor: 'red', // Basic red color
+            '&:hover': {
+              backgroundColor: '#d32f2f', // Darker red on hover
+            },
+          }}
+        >
+          Logout
+        </Button>
+      </Box>
+      
       {/* 日付入力と「トレーニングを始める」ボタン */}
       {!session && (
         <Card sx={{ mb: 3, p: 2 }}>
