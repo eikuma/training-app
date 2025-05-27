@@ -92,7 +92,25 @@ func (h *WorkoutImpl) CreateWorkoutSession(c echo.Context) error {
 		return echo.NewHTTPError(400, "invalid date format: "+err.Error())
 	}
 
-	workoutSession, err := h.WorkoutService.CreateWorkoutSession(parsedDate, f.UserID)
+	// Retrieve userID from context
+	userIDFromContext, ok := c.Get("userID").(int64)
+	if !ok {
+		// This should ideally not happen if AuthMiddleware is correctly applied and working.
+		// It indicates an issue with how userID is set or retrieved, or middleware not being run.
+		// Changed to http.StatusInternalServerError as this implies an issue with server-side context propagation
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error retrieving user ID from context. Ensure you are logged in.")
+	}
+
+	// Add this explicit check for userIDFromContext being 0
+	if userIDFromContext == 0 {
+		// This indicates that the user associated with the token has an ID of 0,
+		// which should not happen for normally created users (due to AUTO_INCREMENT).
+		// This could also mean the token was generated with a user_id of 0.
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid user ID (0) for creating workout session. Please ensure the user account is valid and login is correct.")
+	}
+
+	// Pass the retrieved userID to the service layer
+	workoutSession, err := h.WorkoutService.CreateWorkoutSession(parsedDate, userIDFromContext)
 	if err != nil {
 		return err
 	}
