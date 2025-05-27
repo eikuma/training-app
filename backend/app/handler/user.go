@@ -3,16 +3,13 @@ package handler
 import (
 	"net/http"
 	"net/mail"
-	"net/mail"
-	"regexp" // Using regexp for simple email validation as per instructions
-	"net/mail"
 	"regexp" // Using regexp for simple email validation as per instructions
 	"time"   // Added for JWT expiration
 
 	"github.com/everytv/pre-employment-training-2024/final/ikuma.esaki/backend/app/model"
-	"github.com/golang-jwt/jwt/v5" // Added for JWT generation
 	"github.com/gocraft/dbr/v2"
-	"github.com/labstack/echo/v4" // Replaced Gin with Echo
+	"github.com/golang-jwt/jwt/v5" // Added for JWT generation
+	"github.com/labstack/echo/v4"  // Replaced Gin with Echo
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -65,7 +62,6 @@ func RegisterUser(c echo.Context) error { // Changed signature to echo.Context a
 	// if !isValidEmail(request.Email) {
 	// return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid email format"})
 	// }
-
 
 	// Validate password length
 	if len(request.Password) < 8 {
@@ -140,12 +136,7 @@ func LoginUser(c echo.Context) error { // Changed signature to echo.Context and 
 	}
 
 	// Type assertion to access User struct fields from the interface
-	dbUser, ok := dbUserInterface.(*model.UserImpl)
-	if !ok {
-		// This case should ideally not happen if GetUserByEmail returns a valid *model.UserImpl
-		// and model.UserImpl embeds model.User correctly.
-		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to process user data"})
-	}
+	dbUser := dbUserInterface
 
 	// Compare password with stored hash
 	err = bcrypt.CompareHashAndPassword([]byte(dbUser.PasswordHash), []byte(request.Password))

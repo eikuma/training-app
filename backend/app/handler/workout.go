@@ -8,7 +8,7 @@ import (
 	"github.com/everytv/pre-employment-training-2024/final/ikuma.esaki/backend/app/form"
 	"github.com/everytv/pre-employment-training-2024/final/ikuma.esaki/backend/app/response"
 	"github.com/everytv/pre-employment-training-2024/final/ikuma.esaki/backend/app/service"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 type (

@@ -2,7 +2,6 @@ package model
 
 import (
 	"testing"
-	"time"
 
 	"github.com/everytv/pre-employment-training-2024/final/ikuma.esaki/backend/db"
 	"github.com/gocraft/dbr/v2"
@@ -36,13 +35,11 @@ func clearUserTable() {
 
 }
 
-
 func TestUser_Create(t *testing.T) {
 	// Ensure a clean state for this test
 	clearUserTable()
 	sess := db.GetSession("training_db")
 	assert.NotNil(t, sess, "Database session should not be nil")
-
 
 	userModel := NewUser()
 	username := "testuser_create"
@@ -54,11 +51,9 @@ func TestUser_Create(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotNil(t, createdUser)
-	
-	// Type assert to access fields
-	createdUserImpl, ok := createdUser.(*UserImpl)
-	assert.True(t, ok)
 
+	// Type assert to access fields
+	createdUserImpl := createdUser
 	assert.Equal(t, username, createdUserImpl.Username)
 	assert.Equal(t, email, createdUserImpl.Email)
 	assert.Equal(t, string(hashedPassword), createdUserImpl.PasswordHash)
@@ -68,8 +63,7 @@ func TestUser_Create(t *testing.T) {
 	fetchedUser, err := userModel.GetUserByEmail(email)
 	assert.NoError(t, err)
 	assert.NotNil(t, fetchedUser)
-	fetchedUserImpl, ok := fetchedUser.(*UserImpl)
-	assert.True(t, ok)
+	fetchedUserImpl := fetchedUser
 	assert.Equal(t, username, fetchedUserImpl.Username)
 }
 
@@ -102,8 +96,7 @@ func TestUser_GetUserByEmail_Existing(t *testing.T) {
 	foundUser, err := userModel.GetUserByEmail(email)
 	assert.NoError(t, err)
 	assert.NotNil(t, foundUser)
-	foundUserImpl, ok := foundUser.(*UserImpl)
-	assert.True(t, ok)
+	foundUserImpl := foundUser
 	assert.Equal(t, username, foundUserImpl.Username)
 	assert.Equal(t, email, foundUserImpl.Email)
 }
@@ -121,14 +114,12 @@ func TestUser_GetUserByID_Existing(t *testing.T) {
 
 	createdUser, err := userModel.Create(username, email, string(hashedPassword))
 	assert.NoError(t, err)
-	createdUserImpl, ok := createdUser.(*UserImpl)
-	assert.True(t, ok)
-
+	createdUserImpl := createdUser
+	assert.Equal(t, username, createdUserImpl.Username)
 	foundUser, err := userModel.GetUserByID(createdUserImpl.UserID)
 	assert.NoError(t, err)
 	assert.NotNil(t, foundUser)
-	foundUserImpl, ok := foundUser.(*UserImpl)
-	assert.True(t, ok)
+	foundUserImpl := foundUser
 	assert.Equal(t, username, foundUserImpl.Username)
 	assert.Equal(t, createdUserImpl.UserID, foundUserImpl.UserID)
 }
@@ -138,7 +129,7 @@ func TestUser_GetUserByUsername_Existing(t *testing.T) {
 	clearUserTable()
 	sess := db.GetSession("training_db")
 	assert.NotNil(t, sess, "Database session should not be nil")
-	
+
 	userModel := NewUser()
 	username := "testgetusername"
 	email := "getusername@example.com"
@@ -151,8 +142,7 @@ func TestUser_GetUserByUsername_Existing(t *testing.T) {
 	foundUser, err := userModel.GetUserByUsername(username)
 	assert.NoError(t, err)
 	assert.NotNil(t, foundUser)
-	foundUserImpl, ok := foundUser.(*UserImpl)
-	assert.True(t, ok)
+	foundUserImpl := foundUser
 	assert.Equal(t, username, foundUserImpl.Username)
 }
 
@@ -251,4 +241,6 @@ func TestUser_GetUserByID_NotFound(t *testing.T) {
 
 // This shows how complex dbr mocking can be. For now, the tests rely on the actual test DB connection.
 
-```
+/*
+
+ */

@@ -6,8 +6,8 @@ import (
 	"github.com/everytv/pre-employment-training-2024/final/ikuma.esaki/backend/app/handler"
 	app_middleware "github.com/everytv/pre-employment-training-2024/final/ikuma.esaki/backend/app/middleware" // Added middleware import
 	"github.com/joho/godotenv"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func Init(e *echo.Echo) {
@@ -29,7 +29,7 @@ func Init(e *echo.Echo) {
 	e.GET("/workouts", workoutHandler.List, app_middleware.AuthMiddleware)
 	e.GET("/workouts/:id", workoutHandler.Get) // Assuming :id route does not need auth for now, or it will be specified
 	e.POST("/workouts", workoutHandler.CreateWorkoutSession, app_middleware.AuthMiddleware)
-	e.POST("/workouts/:id/exercises", workoutHandler.CreateExercise)             // Assuming these nested routes also need auth if parent does
+	e.POST("/workouts/:id/exercises", workoutHandler.CreateExercise)              // Assuming these nested routes also need auth if parent does
 	e.POST("/workouts/:id/exercises/:exercise_id/sets", workoutHandler.CreateSet) // Or apply middleware individually as needed
 
 	recommendationHandler := handler.NewRecommendation()

@@ -20,20 +20,20 @@ type UserImpl struct {
 }
 
 // User defines the interface for user operations.
-type User interface {
-	Create(username, email, passwordHash string) (User, error)
-	GetUserByUsername(username string) (User, error)
-	GetUserByEmail(email string) (User, error)
-	GetUserByID(userID int64) (User, error)
+type UserRepository interface {
+	Create(username, email, passwordHash string) (*UserImpl, error)
+	GetUserByUsername(username string) (*UserImpl, error)
+	GetUserByEmail(email string) (*UserImpl, error)
+	GetUserByID(userID int64) (*UserImpl, error)
 }
 
 // NewUser creates a new User object.
-func NewUser() User {
+func NewUser() UserRepository {
 	return &UserImpl{}
 }
 
 // Create inserts a new user record into the database.
-func (u *UserImpl) Create(username, email, passwordHash string) (User, error) {
+func (u *UserImpl) Create(username, email, passwordHash string) (*UserImpl, error) {
 	sess := db.GetSession("training_db")
 	if sess == nil {
 		return nil, errors.New("database session not found")
@@ -66,7 +66,7 @@ func (u *UserImpl) Create(username, email, passwordHash string) (User, error) {
 }
 
 // GetUserByUsername retrieves a user by their username.
-func (u *UserImpl) GetUserByUsername(username string) (User, error) {
+func (u *UserImpl) GetUserByUsername(username string) (*UserImpl, error) {
 	sess := db.GetSession("training_db")
 	if sess == nil {
 		return nil, errors.New("database session not found")
@@ -88,7 +88,7 @@ func (u *UserImpl) GetUserByUsername(username string) (User, error) {
 }
 
 // GetUserByEmail retrieves a user by their email.
-func (u *UserImpl) GetUserByEmail(email string) (User, error) {
+func (u *UserImpl) GetUserByEmail(email string) (*UserImpl, error) {
 	sess := db.GetSession("training_db")
 	if sess == nil {
 		return nil, errors.New("database session not found")
@@ -110,7 +110,7 @@ func (u *UserImpl) GetUserByEmail(email string) (User, error) {
 }
 
 // GetUserByID retrieves a user by their ID.
-func (u *UserImpl) GetUserByID(userID int64) (User, error) {
+func (u *UserImpl) GetUserByID(userID int64) (*UserImpl, error) {
 	sess := db.GetSession("training_db")
 	if sess == nil {
 		return nil, errors.New("database session not found")

@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/everytv/pre-employment-training-2024/final/ikuma.esaki/backend/app/router"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 func main() {

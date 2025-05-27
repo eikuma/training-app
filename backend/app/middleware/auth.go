@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"net/http"
-	"net/http"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -51,7 +50,7 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc { // Changed signatu
 			c.Set("userID", int64(userIDFloat)) // Convert to int64 for consistency
 			return next(c)                      // Call the next handler
 		}
-		
+
 		// This case might be redundant if token.Valid already covers it,
 		// but it's a good safeguard for malformed claims.
 		return c.JSON(http.StatusUnauthorized, echo.Map{"error": "Invalid token claims"})
