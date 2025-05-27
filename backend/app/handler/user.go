@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"database/sql" // Added import, though might not be strictly necessary if only types are used
+	// "database/sql" // Added import, though might not be strictly necessary if only types are used
 	"log"
 	"net/http"
 	"net/mail"
@@ -159,7 +159,7 @@ func LoginUser(c echo.Context) error { // Changed signature to echo.Context and 
 
 	// Generate JWT token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": dbUser.UserID.Int64, // Changed to use UserID.Int64
+		"user_id": dbUser.UserID.Int64,                   // Changed to use UserID.Int64
 		"exp":     time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
 		"iat":     time.Now().Unix(),                     // Issued at current time
 	})
