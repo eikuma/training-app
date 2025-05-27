@@ -11,7 +11,7 @@ import (
 
 // User represents the structure of a user in the database.
 type User struct {
-	UserID       sql.NullInt64 `db:"user_id,auto_increment"` // Changed to sql.NullInt64
+	UserID       sql.NullInt64 `db:"user_id"` // Changed to sql.NullInt64 and removed auto_increment
 	Username     string        `db:"username"`
 	Email        string        `db:"email"`
 	PasswordHash string        `db:"password_hash"`
