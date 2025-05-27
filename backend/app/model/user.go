@@ -1,7 +1,6 @@
 package model
 
 import (
-	"database/sql" // Added import
 	"log"
 
 	"github.com/everytv/pre-employment-training-2024/final/ikuma.esaki/backend/db"
@@ -11,10 +10,10 @@ import (
 
 // User represents the structure of a user in the database.
 type User struct {
-	UserID       sql.NullInt64 `db:"user_id"` // Changed to sql.NullInt64 and removed auto_increment
-	Username     string        `db:"username"`
-	Email        string        `db:"email"`
-	PasswordHash string        `db:"password_hash"`
+	UserID       int64  `db:"user_id"` // Reverted to int64
+	Username     string `db:"username"`
+	Email        string `db:"email"`
+	PasswordHash string `db:"password_hash"`
 }
 
 // UserImpl embeds User and implements the User interface.
@@ -63,7 +62,7 @@ func (u *UserImpl) Create(username, email, passwordHash string) (*UserImpl, erro
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get last insert ID for user: %s", username)
 	}
-	user.User.UserID = sql.NullInt64{Int64: userID, Valid: true} // Update to assign to sql.NullInt64
+	user.User.UserID = userID // Reverted to assign int64
 
 	return &user, nil
 }
@@ -103,7 +102,7 @@ func (u *UserImpl) GetUserByEmail(email string) (*UserImpl, error) {
 		Where("email = ?", email).
 		LoadOne(&user.User)
 
-	log.Printf("[GetUserByEmail] After LoadOne: user.User.UserID.Int64 = %d, user.User.UserID.Valid = %t, user.User = %+v, err = %v\n", user.User.UserID.Int64, user.User.UserID.Valid, user.User, err)
+	log.Printf("[GetUserByEmail] After LoadOne: user.User.UserID = %d, user.User = %+v, err = %v\n", user.User.UserID, user.User, err)
 
 	if err != nil {
 		if errors.Is(err, dbr.ErrNotFound) {

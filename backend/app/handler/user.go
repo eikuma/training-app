@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"database/sql" // Added import, though might not be strictly necessary if only types are used
 	"log"
 	"net/http"
 	"net/mail"
@@ -140,10 +139,10 @@ func LoginUser(c echo.Context) error { // Changed signature to echo.Context and 
 	// Type assertion to access User struct fields from the interface
 	dbUser := dbUserInterface
 
-	log.Printf("LoginUser: Retrieved dbUser.UserID.Int64 = %d, dbUser.UserID.Valid = %t, dbUser = %+v\n", dbUser.UserID.Int64, dbUser.UserID.Valid, dbUser)
+	log.Printf("LoginUser: Retrieved dbUser.UserID = %d, dbUser = %+v\n", dbUser.UserID, dbUser)
 
-	if !dbUser.UserID.Valid || dbUser.UserID.Int64 == 0 {
-		log.Printf("LoginUser: Attempt to login with UserID 0 or invalid UserID for email %s. Aborting token generation.", request.Email)
+	if dbUser.UserID == 0 {
+		log.Printf("LoginUser: Attempt to login with UserID 0 for email %s. Aborting token generation.", request.Email)
 		// Return an error similar to other validation errors or invalid credentials.
 		// Using StatusUnauthorized to avoid revealing specific account issues.
 		return c.JSON(http.StatusUnauthorized, echo.Map{"error": "Invalid credentials or user account issue."})
@@ -159,7 +158,7 @@ func LoginUser(c echo.Context) error { // Changed signature to echo.Context and 
 
 	// Generate JWT token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": dbUser.UserID.Int64, // Changed to use UserID.Int64
+		"user_id": dbUser.UserID, // Reverted
 		"exp":     time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
 		"iat":     time.Now().Unix(),                     // Issued at current time
 	})
