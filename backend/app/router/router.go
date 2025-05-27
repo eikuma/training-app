@@ -27,7 +27,7 @@ func Init(e *echo.Echo) {
 	// ワークアウトのルーティングを設定
 	// Apply AuthMiddleware to routes requiring authentication
 	e.GET("/workouts", workoutHandler.List, app_middleware.AuthMiddleware)
-	e.GET("/workouts/:id", workoutHandler.Get) // Assuming :id route does not need auth for now, or it will be specified
+	e.GET("/workouts/:id", workoutHandler.Get, app_middleware.AuthMiddleware) // Added AuthMiddleware
 	e.POST("/workouts", workoutHandler.CreateWorkoutSession, app_middleware.AuthMiddleware)
 	e.POST("/workouts/:id/exercises", workoutHandler.CreateExercise)              // Assuming these nested routes also need auth if parent does
 	e.POST("/workouts/:id/exercises/:exercise_id/sets", workoutHandler.CreateSet) // Or apply middleware individually as needed
