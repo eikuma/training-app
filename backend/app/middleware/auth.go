@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
 	"strings"
 
@@ -43,6 +44,7 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc { // Changed signatu
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			userIDFloat, okUserID := claims["user_id"].(float64) // JWT standard decodes numbers as float64
+			log.Printf("AuthMiddleware: claims_user_id=%v, userIDFloat=%v, okUserID=%v\n", claims["user_id"], userIDFloat, okUserID)
 			if !okUserID {
 				return c.JSON(http.StatusUnauthorized, echo.Map{"error": "Invalid token claims: user_id missing or not a number"})
 			}

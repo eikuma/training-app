@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"log"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -94,10 +96,11 @@ func (h *WorkoutImpl) CreateWorkoutSession(c echo.Context) error {
 
 	// Retrieve userID from context
 	userID, ok := c.Get("userID").(int64)
-	if !ok {
-		// This should ideally not happen if AuthMiddleware is correctly applied and working.
-		// It indicates an issue with how userID is set or retrieved, or middleware not being run.
-		return echo.NewHTTPError(500, "Failed to get user ID from context or user ID is not of type int64")
+	log.Printf("CreateWorkoutSession: context_userID=%v, ok=%v\n", userID, ok) // Keep existing log
+
+	if !ok || userID == 0 { // Check if userID is 0
+		// If userID is not found, or is 0, treat as unauthorized
+		return echo.NewHTTPError(http.StatusUnauthorized, "User ID not found or invalid, authentication required.")
 	}
 
 	// Pass the retrieved userID to the service layer
