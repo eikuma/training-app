@@ -1,6 +1,8 @@
 package model
 
 import (
+	"log"
+
 	"github.com/everytv/pre-employment-training-2024/final/ikuma.esaki/backend/db"
 	"github.com/gocraft/dbr/v2"
 	"github.com/pkg/errors"
@@ -99,6 +101,8 @@ func (u *UserImpl) GetUserByEmail(email string) (*UserImpl, error) {
 		From("users").
 		Where("email = ?", email).
 		LoadOne(&user.User)
+
+	log.Printf("[GetUserByEmail] After LoadOne: user.User.UserID = %d, user.User = %+v, err = %v\n", user.User.UserID, user.User, err)
 
 	if err != nil {
 		if errors.Is(err, dbr.ErrNotFound) {
