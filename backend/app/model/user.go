@@ -97,7 +97,7 @@ func (u *UserImpl) GetUserByEmail(email string) (*UserImpl, error) {
 	}
 
 	var user UserImpl
-	err := sess.Select("*").
+	err := sess.Select("user_id", "username", "email", "password_hash").
 		From("users").
 		Where("email = ?", email).
 		LoadOne(&user.User)
