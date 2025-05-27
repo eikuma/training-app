@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 	"net/mail"
 	"regexp" // Using regexp for simple email validation as per instructions
@@ -137,6 +138,8 @@ func LoginUser(c echo.Context) error { // Changed signature to echo.Context and 
 
 	// Type assertion to access User struct fields from the interface
 	dbUser := dbUserInterface
+
+	log.Printf("LoginUser: Retrieved dbUser.UserID = %d, dbUser = %+v\n", dbUser.UserID, dbUser)
 
 	// Compare password with stored hash
 	err = bcrypt.CompareHashAndPassword([]byte(dbUser.PasswordHash), []byte(request.Password))
