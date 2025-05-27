@@ -18,8 +18,9 @@ func TestWorkoutList(t *testing.T) {
 		WorkoutSession model.WorkoutSession
 	}
 	type args struct {
-		id   int64
-		date time.Time
+		requestingUserID int64     // Added
+		sessionID        int64     // Renamed from 'id'
+		date             time.Time
 	}
 	tests := []struct {
 		testCase  string
@@ -30,12 +31,14 @@ func TestWorkoutList(t *testing.T) {
 		{
 			testCase: "正常系",
 			args: args{
-				id:   int64(0),
-				date: time.Time{},
+				requestingUserID: int64(1), // Added
+				sessionID:        int64(0), // Renamed
+				date:             time.Time{},
 			},
 			fields: func(ctrl *gomock.Controller) fields {
 				WorkoutSession := mock_model.NewMockWorkoutSession(ctrl)
-				WorkoutSession.EXPECT().LoadByIDAndDate(int64(0), time.Time{}).Return(&model.WorkoutSessions{
+				// Updated mock call to include requestingUserID
+				WorkoutSession.EXPECT().LoadByIDAndDate(int64(1), int64(0), time.Time{}).Return(&model.WorkoutSessions{
 					{ID: int64(1), Date: time.Now(), UserID: int64(1)},
 					{ID: int64(2), Date: time.Now(), UserID: int64(1)},
 					{ID: int64(3), Date: time.Now(), UserID: int64(1)},
@@ -51,14 +54,16 @@ func TestWorkoutList(t *testing.T) {
 			},
 		},
 		{
-			testCase: "正常系(1件取得id指定)",
+			testCase: "正常系(1件取得sessionID指定)", // Renamed test case
 			args: args{
-				id:   int64(1),
-				date: time.Time{},
+				requestingUserID: int64(1), // Added
+				sessionID:        int64(1), // Renamed
+				date:             time.Time{},
 			},
 			fields: func(ctrl *gomock.Controller) fields {
 				WorkoutSession := mock_model.NewMockWorkoutSession(ctrl)
-				WorkoutSession.EXPECT().LoadByIDAndDate(int64(1), time.Time{}).Return(&model.WorkoutSessions{
+				// Updated mock call
+				WorkoutSession.EXPECT().LoadByIDAndDate(int64(1), int64(1), time.Time{}).Return(&model.WorkoutSessions{
 					{ID: int64(1), Date: time.Now(), UserID: int64(1)},
 				}, nil)
 				return fields{
@@ -74,12 +79,14 @@ func TestWorkoutList(t *testing.T) {
 		{
 			testCase: "正常系(1件取得日付指定)",
 			args: args{
-				id:   int64(0),
-				date: time.Date(2020, 1, 1, 1, 0, 0, 0, time.UTC),
+				requestingUserID: int64(1), // Added
+				sessionID:        int64(0), // Renamed
+				date:             time.Date(2020, 1, 1, 1, 0, 0, 0, time.UTC),
 			},
 			fields: func(ctrl *gomock.Controller) fields {
 				WorkoutSession := mock_model.NewMockWorkoutSession(ctrl)
-				WorkoutSession.EXPECT().LoadByIDAndDate(int64(0), time.Date(2020, 1, 1, 1, 0, 0, 0, time.UTC)).Return(&model.WorkoutSessions{
+				// Updated mock call
+				WorkoutSession.EXPECT().LoadByIDAndDate(int64(1), int64(0), time.Date(2020, 1, 1, 1, 0, 0, 0, time.UTC)).Return(&model.WorkoutSessions{
 					{ID: int64(1), Date: time.Date(2020, 1, 1, 1, 0, 0, 0, time.UTC), UserID: int64(1)},
 				}, nil)
 				return fields{
@@ -93,33 +100,88 @@ func TestWorkoutList(t *testing.T) {
 			},
 		},
 		{
-			testCase: "正常系(空)",
+			testCase: "正常系(UserID 1でフィルタリング)", // New test case
 			args: args{
-				id:   int64(100),
-				date: time.Date(2020, 1, 1, 1, 0, 0, 0, time.UTC),
+				requestingUserID: int64(1),
+				sessionID:        int64(0),
+				date:             time.Time{},
 			},
 			fields: func(ctrl *gomock.Controller) fields {
 				WorkoutSession := mock_model.NewMockWorkoutSession(ctrl)
-				WorkoutSession.EXPECT().LoadByIDAndDate(int64(100), time.Date(2020, 1, 1, 1, 0, 0, 0, time.UTC)).Return(&model.WorkoutSessions{}, nil)
+				WorkoutSession.EXPECT().LoadByIDAndDate(int64(1), int64(0), time.Time{}).Return(&model.WorkoutSessions{
+					{ID: int64(1), UserID: int64(1), Date: time.Now()},
+					{ID: int64(2), UserID: int64(1), Date: time.Now()},
+				}, nil)
 				return fields{
 					WorkoutSession: WorkoutSession,
 				}
 			},
 			assertion: func(r response.WorkoutSessions, err error) {
 				assert.NoError(t, err)
-				assert.Nil(t, r)
+				assert.NotNil(t, r)
+				assert.Len(t, r, 2)
+				for _, session := range r {
+					assert.Equal(t, int64(1), session.UserID)
+				}
+			},
+		},
+		{
+			testCase: "正常系(UserID 2でフィルタリング、結果なし)", // New test case
+			args: args{
+				requestingUserID: int64(2),
+				sessionID:        int64(0),
+				date:             time.Time{},
+			},
+			fields: func(ctrl *gomock.Controller) fields {
+				WorkoutSession := mock_model.NewMockWorkoutSession(ctrl)
+				WorkoutSession.EXPECT().LoadByIDAndDate(int64(2), int64(0), time.Time{}).Return(&model.WorkoutSessions{}, nil)
+				return fields{
+					WorkoutSession: WorkoutSession,
+				}
+			},
+			assertion: func(r response.WorkoutSessions, err error) {
+				assert.NoError(t, err)
+				// Depending on how the service handles empty results from the model,
+				// r might be nil or an empty slice. The original test for "正常系(空)"
+				// asserted for nil and len 0. Let's stick to that for consistency.
+				// The service layer currently creates an empty slice if workoutSessionsImpl is nil or empty.
+				assert.NotNil(t, r) // Service layer initializes an empty slice
+				assert.Len(t, r, 0)
+			},
+		},
+		{
+			testCase: "正常系(空)",
+			args: args{
+				requestingUserID: int64(1), // Added
+				sessionID:        int64(100), // Renamed
+				date:             time.Date(2020, 1, 1, 1, 0, 0, 0, time.UTC),
+			},
+			fields: func(ctrl *gomock.Controller) fields {
+				WorkoutSession := mock_model.NewMockWorkoutSession(ctrl)
+				// Updated mock call
+				WorkoutSession.EXPECT().LoadByIDAndDate(int64(1), int64(100), time.Date(2020, 1, 1, 1, 0, 0, 0, time.UTC)).Return(&model.WorkoutSessions{}, nil)
+				return fields{
+					WorkoutSession: WorkoutSession,
+				}
+			},
+			assertion: func(r response.WorkoutSessions, err error) {
+				assert.NoError(t, err)
+				// Service layer initializes an empty slice
+				assert.NotNil(t, r)
 				assert.Len(t, r, 0)
 			},
 		},
 		{
 			testCase: "エラー",
 			args: args{
-				id:   int64(100),
-				date: time.Date(2020, 1, 1, 1, 0, 0, 0, time.UTC),
+				requestingUserID: int64(1), // Added
+				sessionID:        int64(100), // Renamed
+				date:             time.Date(2020, 1, 1, 1, 0, 0, 0, time.UTC),
 			},
 			fields: func(ctrl *gomock.Controller) fields {
 				WorkoutSession := mock_model.NewMockWorkoutSession(ctrl)
-				WorkoutSession.EXPECT().LoadByIDAndDate(int64(100), time.Date(2020, 1, 1, 1, 0, 0, 0, time.UTC)).Return(nil, errors.New("couldn't load workout_sessions"))
+				// Updated mock call
+				WorkoutSession.EXPECT().LoadByIDAndDate(int64(1), int64(100), time.Date(2020, 1, 1, 1, 0, 0, 0, time.UTC)).Return(nil, errors.New("couldn't load workout_sessions"))
 				return fields{
 					WorkoutSession: WorkoutSession,
 				}
@@ -139,7 +201,8 @@ func TestWorkoutList(t *testing.T) {
 			w := &WorkoutImpl{
 				WorkoutSession: fields.WorkoutSession,
 			}
-			tt.assertion(w.List(tt.args.id, tt.args.date))
+			// Updated w.List call
+			tt.assertion(w.List(tt.args.requestingUserID, tt.args.sessionID, tt.args.date))
 		})
 	}
 }

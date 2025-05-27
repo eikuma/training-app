@@ -11,7 +11,7 @@ import (
 type (
 	// WorkoutSession ワークアウトのインターフェースを表す
 	WorkoutSession interface {
-		LoadByIDAndDate(id int64, date time.Time) (*WorkoutSessions, error)
+		LoadByIDAndDate(userID int64, sessionID int64, date time.Time) (*WorkoutSessions, error) // Modified signature
 		Load(id int64) (*WorkoutSessionImpl, error)
 		Update(attrs map[string]interface{}) (bool, error)
 		Create(date time.Time, userId int64) (*WorkoutSessionImpl, error)
@@ -35,18 +35,21 @@ func NewWorkoutSession() WorkoutSession {
 	return &WorkoutSessionImpl{}
 }
 
-func (r *WorkoutSessionImpl) LoadByIDAndDate(id int64, date time.Time) (*WorkoutSessions, error) {
-	return r.LoadByIDAndDateTx(db.GetSession("training_db"), id, date)
+func (r *WorkoutSessionImpl) LoadByIDAndDate(userID int64, sessionID int64, date time.Time) (*WorkoutSessions, error) { // Modified signature
+	return r.LoadByIDAndDateTx(db.GetSession("training_db"), userID, sessionID, date) // Pass userID
 	// return nil, nil
 }
 
-func (r *WorkoutSessionImpl) LoadByIDAndDateTx(tx *dbr.Session, id int64, date time.Time) (*WorkoutSessions, error) {
+func (r *WorkoutSessionImpl) LoadByIDAndDateTx(tx *dbr.Session, userID int64, sessionID int64, date time.Time) (*WorkoutSessions, error) { // Modified signature
 	m := NewWorkoutSessions()
 
 	builder := tx.Select("*").From("workout_sessions")
 
-	if id != 0 {
-		builder = builder.Where("session_id = ?", id)
+	if userID != 0 { // Added userID filter
+		builder = builder.Where("user_id = ?", userID)
+	}
+	if sessionID != 0 { // Renamed id to sessionID
+		builder = builder.Where("session_id = ?", sessionID)
 	}
 	if !date.IsZero() {
 		builder = builder.Where("training_date = ?", date)

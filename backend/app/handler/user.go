@@ -158,7 +158,7 @@ func LoginUser(c echo.Context) error { // Changed signature to echo.Context and 
 
 	// Generate JWT token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": dbUser.UserID,                         // Reverted
+		"user_id": dbUser.UserID, // Reverted
 		"exp":     time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
 		"iat":     time.Now().Unix(),                     // Issued at current time
 	})
