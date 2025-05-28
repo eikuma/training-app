@@ -1,26 +1,36 @@
-"use client"; // Ensure this is at the top for client-side hooks
+"use client";
 
 import Link from 'next/link';
-import React, { useEffect } from 'react'; // Import useEffect
-import { useRouter } from 'next/navigation'; // Import useRouter
+import React, { useState, useEffect } from 'react'; // Import useState and useEffect
+import { useRouter } from 'next/navigation';
 
 const Home: React.FC = () => {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true); // Start in loading state
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // New state for auth status
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (!token) {
       router.push('/login');
+    } else {
+      setIsAuthenticated(true); // User has a token
     }
-  }, [router]); // Add router to dependency array
+    setIsLoading(false); // Finished checking auth
+  }, [router]);
 
-  // It might be good to return null or a loading spinner if redirecting,
-  // to avoid briefly flashing the page content.
-  const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
-  if (!token) {
-    return null; // Or a loading component
+  if (isLoading) {
+    return null; // Or a loading spinner, same on server and initial client
   }
 
+  // If not authenticated and loading is finished, router.push already called.
+  // Rendering null here will prevent flashing of content before redirect completes.
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  // Only render content if authenticated and not loading
+  // This is the original content of the Home page
   return (
     <div style={{ textAlign: 'center', marginTop: '2rem' }}>
       <h1>ジムのトレーニング記録アプリ</h1>
