@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"log"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -51,30 +53,54 @@ func (h *WorkoutImpl) List(c echo.Context) error {
 		}
 	}
 
-	workoutSessions, err = h.WorkoutService.List(f.ID, parsedDate)
+	// Retrieve requestingUserID from context
+	requestingUserID, ok := c.Get("userID").(int64)
+	if !ok || requestingUserID == 0 {
+		// This should ideally not happen if AuthMiddleware is correctly applied and working.
+		// It indicates an issue with how userID is set or retrieved, or middleware not being run.
+		return echo.NewHTTPError(http.StatusUnauthorized, "User ID not found in context, invalid, or is zero.")
+	}
+
+	// Pass requestingUserID, f.ID (as sessionID), and parsedDate to the service layer
+	workoutSessions, err = h.WorkoutService.List(requestingUserID, f.ID, parsedDate)
 	if err != nil {
 		return err
 	}
 
+	// It's valid for a user to have no workouts on a given date or for a specific session ID.
+	// So, returning an empty list is appropriate here.
 	if len(workoutSessions) == 0 {
-		return c.JSON(200, map[string]interface{}{"workouts": []interface{}{}})
+		return c.JSON(http.StatusOK, map[string]interface{}{"workouts": []interface{}{}}) // Return 200 OK with empty list
 	}
 
-	return c.JSON(200, map[string]interface{}{"workouts": workoutSessions})
+	return c.JSON(http.StatusOK, map[string]interface{}{"workouts": workoutSessions}) // Return 200 OK
 }
 
 func (h *WorkoutImpl) Get(c echo.Context) error {
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(400, "invalid id")
+	// Retrieve currentUserID from context
+	currentUserID, ok := c.Get("userID").(int64)
+	if !ok || currentUserID == 0 {
+		return echo.NewHTTPError(http.StatusUnauthorized, "User ID not found or invalid.")
 	}
 
-	workoutSession, err := h.WorkoutService.Get(id)
+	sessionID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid session ID format.") // Use http.StatusBadRequest
 	}
 
-	return c.JSON(200, map[string]interface{}{"workout": workoutSession})
+	workoutSessionResponse, err := h.WorkoutService.Get(sessionID)
+	if err != nil {
+		// The service layer might return specific errors (e.g., not found)
+		// which should be propagated or handled appropriately.
+		return err // Propagate error from service layer
+	}
+
+	// Authorization check: Ensure the workout session belongs to the current user
+	if workoutSessionResponse.UserID != currentUserID {
+		return echo.NewHTTPError(http.StatusForbidden, "Access denied.")
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{"workout": workoutSessionResponse}) // Use http.StatusOK
 }
 
 func (h *WorkoutImpl) CreateWorkoutSession(c echo.Context) error {
@@ -94,10 +120,11 @@ func (h *WorkoutImpl) CreateWorkoutSession(c echo.Context) error {
 
 	// Retrieve userID from context
 	userID, ok := c.Get("userID").(int64)
-	if !ok {
-		// This should ideally not happen if AuthMiddleware is correctly applied and working.
-		// It indicates an issue with how userID is set or retrieved, or middleware not being run.
-		return echo.NewHTTPError(500, "Failed to get user ID from context or user ID is not of type int64")
+	log.Printf("CreateWorkoutSession: context_userID=%v, ok=%v\n", userID, ok) // Keep existing log
+
+	if !ok || userID == 0 { // Check if userID is 0
+		// If userID is not found, or is 0, treat as unauthorized
+		return echo.NewHTTPError(http.StatusUnauthorized, "User ID not found or invalid, authentication required.")
 	}
 
 	// Pass the retrieved userID to the service layer

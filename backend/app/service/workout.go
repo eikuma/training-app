@@ -11,7 +11,7 @@ import (
 type (
 	// Workout ワークアウトのサービスを表す
 	Workout interface {
-		List(id int64, date time.Time) (response.WorkoutSessions, error)
+		List(requestingUserID int64, sessionID int64, date time.Time) (response.WorkoutSessions, error) // Modified signature
 		Get(id int64) (*response.GetWorkoutSession, error)
 		CreateWorkoutSession(date time.Time, userId int64) (*response.WorkoutSession, error)
 		CreateExercise(sessionId int64, exerciseName string) (*response.Exercise, error)
@@ -35,15 +35,18 @@ func NewWorkout() Workout {
 }
 
 // List ワークアウトの一覧を取得
-func (s *WorkoutImpl) List(id int64, date time.Time) (response.WorkoutSessions, error) {
-	workoutSessions, err := s.WorkoutSession.LoadByIDAndDate(id, date)
+func (s *WorkoutImpl) List(requestingUserID int64, sessionID int64, date time.Time) (response.WorkoutSessions, error) { // Modified signature
+	workoutSessionsImpl, err := s.WorkoutSession.LoadByIDAndDate(requestingUserID, sessionID, date) // Pass requestingUserID, use sessionID
 	if err != nil {
 		return nil, err
 	}
 
 	var responseWorkoutSessions response.WorkoutSessions
-	for _, workoutSession := range *workoutSessions {
-		responseWorkoutSessions = append(responseWorkoutSessions, *response.NewWorkoutSession().WorkoutSessionFromModel(&workoutSession))
+	// Ensure correct processing of workoutSessionsImpl (pointer to slice)
+	if workoutSessionsImpl != nil {
+		for _, workoutSession := range *workoutSessionsImpl {
+			responseWorkoutSessions = append(responseWorkoutSessions, *response.NewWorkoutSession().WorkoutSessionFromModel(&workoutSession))
+		}
 	}
 
 	return responseWorkoutSessions, nil

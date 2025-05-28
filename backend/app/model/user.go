@@ -1,6 +1,8 @@
 package model
 
 import (
+	"log"
+
 	"github.com/everytv/pre-employment-training-2024/final/ikuma.esaki/backend/db"
 	"github.com/gocraft/dbr/v2"
 	"github.com/pkg/errors"
@@ -8,7 +10,7 @@ import (
 
 // User represents the structure of a user in the database.
 type User struct {
-	UserID       int64  `db:"user_id,auto_increment"`
+	UserID       int64  `db:"user_id"` // Reverted to int64
 	Username     string `db:"username"`
 	Email        string `db:"email"`
 	PasswordHash string `db:"password_hash"`
@@ -60,7 +62,7 @@ func (u *UserImpl) Create(username, email, passwordHash string) (*UserImpl, erro
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get last insert ID for user: %s", username)
 	}
-	user.UserID = userID
+	user.User.UserID = userID // Reverted to assign int64
 
 	return &user, nil
 }
@@ -95,10 +97,12 @@ func (u *UserImpl) GetUserByEmail(email string) (*UserImpl, error) {
 	}
 
 	var user UserImpl
-	err := sess.Select("*").
+	err := sess.Select("user_id", "username", "email", "password_hash").
 		From("users").
 		Where("email = ?", email).
 		LoadOne(&user.User)
+
+	log.Printf("[GetUserByEmail] After LoadOne: user.User.UserID = %d, user.User = %+v, err = %v\n", user.User.UserID, user.User, err)
 
 	if err != nil {
 		if errors.Is(err, dbr.ErrNotFound) {
